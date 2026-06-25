@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
     const favorites = await prisma.favoriteFoods.findMany({
       where: {
-        user: { email: session.user?.email },
+        user: { email: session.user?.email as string },
         ...(mealType && { mealType })
       },
       orderBy: { createdAt: "desc" }

@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const weights = await prisma.weightEntry.findMany({
       where: {
-        user: { email: session.user?.email },
+        user: { email: session.user?.email as string },
         date: { gte: startDate }
       },
       orderBy: { date: "asc" }
