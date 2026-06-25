@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  name            String?
+  email           String   @unique
+  password        String
+  height          Float?   // in cm
+  weight          Float?   // in kg (current)
+  goal            String?  // e.g. "LOSE_WEIGHT", "MAINTAIN", "GAIN_WEIGHT"
+  dailyCalorieGoal Int     @default(2000) // default 2000 kcal
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  foods           FoodEntry[]
+  exercises       ExerciseEntry[]
+  weights         WeightEntry[]
+  favorites       FavoriteFoods[]
+}
+
+model FoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  calories  Int
+  protein   Float?   // in grams
+  carbs     Float?   // in grams
+  fat       Float?   // in grams
+  fiber     Float?   // in grams
+  sodium    Float?   // in mg
+  sugar     Float?   // in grams
+  mealType  String   @default("other") // breakfast, lunch, dinner, snack, other
+  serving   String?  // e.g. "1 cup", "100g"
+  imageUrl  String?  // for food photos
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model ExerciseEntry {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String   // e.g. "Running", "Cycling"
+  category       String   @default("cardio") // cardio, strength, flexibility, sports, other
+  durationMin    Int      // in minutes
+  caloriesBurned Int
+  intensity      String?  @default("moderate") // light, moderate, vigorous
+  date           DateTime @default(now())
+  createdAt      DateTime @default(now())
+}
+
+model WeightEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight    Float    // in kg
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  
+  @@index([userId, date])
+}
+
+model FavoriteFoods {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  calories  Int
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  fiber     Float?
+  mealType  String   @default("other")
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, name])
+  @@index([userId])
+}
